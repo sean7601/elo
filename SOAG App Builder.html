@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELO App Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .container {
+            width: 300px;
+            margin-top: 20px;
+        }
+        textarea, input {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ELO App Generator</h1>
+
+    <!-- Textbox for pasting data from Excel -->
+    <div class="container">
+        <textarea id="excelInput" placeholder="Paste # and Description from Excel here" rows="10"></textarea>
+    </div>
+
+    <!-- Upload the main app HTML file -->
+    <div class="container">
+        <input type="file" id="appFileInput" accept=".html">
+    </div>
+
+    <div class="container">
+        <button onclick="generateCustomApp()">Generate and Download Custom ELO App</button>
+    </div>
+
+    <script>
+        function generateCustomApp() {
+            const excelInput = document.getElementById("excelInput").value.trim();
+            const appFileInput = document.getElementById("appFileInput").files[0];
+
+            if (!excelInput || !appFileInput) {
+                alert("Please paste data and upload the main app file.");
+                return;
+            }
+
+            const itemsArray = excelInput.split("\n").map(line => {
+                const [number, description] = line.split("\t");
+                return `{ name: "${number.trim()}: ${description.trim()}", variance: 100, competes:0, mean: 100 }`;
+            });
+            const itemsData = `[${itemsArray.join(",\n")}]`;
+	console.log(itemsData)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let fileContent = e.target.result;
+	console.log(fileContent)
+                // Replace the existing items array in the main app file
+                fileContent = fileContent.replace(`let items = []`, `let items = ${itemsData}`);
+		console.log(fileContent)
+                // Create and download the customized HTML file
+                const blob = new Blob([fileContent], { type: "text/html" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "custom_elo_app.html";
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            reader.readAsText(appFileInput);
+        }
+    </script>
+</body>
+</html>
