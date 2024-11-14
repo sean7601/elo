@@ -60,7 +60,7 @@
                 let fileContent = e.target.result;
 	console.log(fileContent)
                 // Replace the existing items array in the main app file
-                fileContent = fileContent.replace(`let items = []`, `let items = ${itemsData}`);
+                fileContent = fileContent.replace(/let items = \[.*?\];/s, `let items = ${itemsData}`);
 		console.log(fileContent)
                 // Create and download the customized HTML file
                 const blob = new Blob([fileContent], { type: "text/html" });
